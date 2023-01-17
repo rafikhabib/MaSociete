@@ -1,10 +1,14 @@
-import Presentation from "./components/presentationHooks";
+import Acceuil from "./components/accueil";
+import Apropos from "./components/apropos";
+import ListDepart from "./components/listDepart";
 
 
 function App() {
   return (
     <div>
-      <Presentation/>
+      <Acceuil/>
+      <Apropos/>
+      <ListDepart/>
     </div>
   );
 }
