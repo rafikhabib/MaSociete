@@ -1,16 +1,12 @@
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { getAll, add, update, remove } from "../services/operationsDepart";
 function ListDepart() {
-  const [departments, setDepartments] = useState([
-    { id: 1673985110156, name: "Commercial" },
-    { id: 1673985115410, name: "Développement" },
-    { id: 1673985129990, name: "Maintenance" },
-  ]);
-  const [newDepartment, setNewDepartment] = useState({ id: null, name: "" });
+  const [departments, setDepartments] = useState([]);
+  const [newDepartment, setNewDepartment] = useState({ id: null, nom: "" });
   const [isEditMode, setIsEditMode] = useState(false);
 
   const handleNewDepartmentChange = (event) => {
-    setNewDepartment({ ...newDepartment, name: event.target.value });
+    setNewDepartment({ ...newDepartment, nom: event.target.value });
   };
 
   const handleEditDepartment = (department) => {
@@ -18,23 +14,33 @@ function ListDepart() {
     setIsEditMode(true);
   };
 
-  const handleDeleteDepartment = (id) => {
-    setDepartments(departments.filter((department) => department.id !== id));
+  const handleDeleteDepartment = (department) => {
+    remove(department._id, () => getDepartements);
   };
 
   const handleSubmit = () => {
     if (isEditMode) {
-      setDepartments(
-        departments.map((department) =>
-          department.id === newDepartment.id ? newDepartment : department
-        )
-      );
+      let newDepart = { id: newDepartment.id, nom: newDepartment.nom };
+      update(newDepartment._id, newDepart, () => getDepartements);
     } else {
-      setDepartments([...departments, { ...newDepartment, id: Date.now() }]);
+      newDepartment.id = Date.now();
+      add(newDepartment, () => {
+        getDepartements();
+      });
     }
-    setNewDepartment({ id: null, name: "" });
+    setNewDepartment({ id: null, nom: "" });
     setIsEditMode(false);
   };
+
+  const getDepartements = () => {
+    getAll((res) => {
+      setDepartments(res.data);
+    });
+  };
+
+  useEffect(() => {
+    getDepartements();
+  });
 
   return (
     <div className="m-4">
@@ -48,7 +54,7 @@ function ListDepart() {
               <input
                 type="text"
                 placeholder="Nouveau Département"
-                value={newDepartment.name}
+                value={newDepartment.nom}
                 onChange={handleNewDepartmentChange}
               />
               <button className="btn btn-primary" onClick={handleSubmit}>
@@ -68,7 +74,7 @@ function ListDepart() {
                 {departments.map((department) => (
                   <tr key={department.id}>
                     <td>{department.id}</td>
-                    <td>{department.name}</td>
+                    <td>{department.nom}</td>
                     <td>
                       <button
                         className="btn btn-secondary"
@@ -80,7 +86,7 @@ function ListDepart() {
                     <td>
                       <button
                         className="btn btn-danger"
-                        onClick={() => handleDeleteDepartment(department.id)}
+                        onClick={() => handleDeleteDepartment(department)}
                       >
                         Supprimer
                       </button>
